@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   db:
     build:
@@ -19,6 +17,8 @@ services:
     ports:
       - ${DOCKER_DB_PORT:-23306}:3306
     tty: true
+    networks:
+      - mynetwork
 
   app:
     container_name: "python-be-syokyu-app"
@@ -39,6 +39,8 @@ services:
     volumes:
       - .:/opt/python-be-syokyu-app
     command: fastapi dev main.py --port=${APP_PORT:-18008} --host=0.0.0.0
+    networks:
+      - mynetwork
 
   adminer:
     image: adminer
@@ -48,7 +50,12 @@ services:
     environment:
         ADMINER_DEFAULT_SERVER: db
         ADMINER_DESIGN: galkaev
+    networks:
+      - mynetwork
 
 volumes:
   python-be-syokyu-db-data:
     driver: local
+
+networks:
+  mynetwork:
