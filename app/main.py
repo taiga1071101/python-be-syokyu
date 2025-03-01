@@ -7,10 +7,10 @@ from pydantic import BaseModel, Field
 from app.const import TodoItemStatusCode
 
 from .models.item_model import ItemModel
-from .models.list_model import ListModel
+from .models.list_model import ListModel    # SQLAlchemyのモデル定義
 
 from fastapi import Depends
-from .dependencies import get_db    # 依存関係を注入
+from .dependencies import get_db    # 依存関係を注入。DBセッション管理
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -103,3 +103,24 @@ def get_todo_list(todo_list_id: int, db: Session = Depends(get_db)):
         return {"error": "Todo list not found"}
     
     return db_item
+
+# クライアントからのリクエストボディをNewTodoList型で受け取る
+# get_db()を使ってデータベースセッションを取得
+# Depends(get_db)により、関数の引数としてdbを渡せば自動でDBに接続できる
+@app.post("/lists", response_model=ResponseTodoList, tags=["Todoリスト"])
+def post_todo_list(todo_list: NewTodoList, db: Session = Depends(get_db)):  
+    """新しいTODOリストを作成するAPI"""
+
+    # 新しいリストを作成。ListModelインスタンスを生成
+    new_list = ListModel(
+        title=todo_list.title,
+        description=todo_list.description
+    )
+
+    db.add(new_list)    # 追加
+    db.commit()     # 保存
+    db.refresh(new_list)    # 保存後に最新のデータを取得
+
+    # 作成したnew_listをレスポンスとして返す
+    # response_model=NewTodoListのため、FastAPIは自動でJSONに変換する
+    return new_list
