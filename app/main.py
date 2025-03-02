@@ -142,3 +142,15 @@ def put_todo_list(todo_list_id: int, update_data: UpdateTodoList, db: Session = 
     db.refresh(todo_list)
 
     return todo_list
+
+@app.delete("/lists/{todo_list_id}", response_model=dict, tags=["Todoリスト"])
+def delete_todo_list(todo_list_id: int, db: Session = Depends(get_db)):
+    """Todoリストを削除するAPI"""
+
+    # 指定されたtodo_list_idのリストを取得
+    todo_list = db.get(ListModel, todo_list_id)
+
+    db.delete(todo_list)
+    db.commit()
+
+    return {}
