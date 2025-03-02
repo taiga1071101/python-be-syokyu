@@ -124,3 +124,21 @@ def post_todo_list(todo_list: NewTodoList, db: Session = Depends(get_db)):
     # 作成したnew_listをレスポンスとして返す
     # response_model=NewTodoListのため、FastAPIは自動でJSONに変換する
     return new_list
+
+@app.put("/lists/{todo_list_id}", response_model=ResponseTodoList, tags=["Todoリスト"])
+def put_todo_list(todo_list_id: int, update_data: UpdateTodoList, db: Session = Depends(get_db)):
+    """Todoリストを更新するAPI"""
+
+    # 指定されたtodo_list_idのリストを取得
+    todo_list = db.get(ListModel, todo_list_id)
+
+    # update_dataに新しい値があれば更新
+    if update_data.title is not None:
+        todo_list.title = update_data.title
+    if update_data.description is not None:
+        todo_list.description = update_data.description
+
+    db.commit()
+    db.refresh(todo_list)
+
+    return todo_list
