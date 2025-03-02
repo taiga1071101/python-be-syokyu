@@ -11,7 +11,7 @@ from .models.list_model import ListModel    # SQLAlchemyのモデル定義
 
 from fastapi import Depends
 from .dependencies import get_db    # 依存関係を注入。DBセッション管理
-from sqlalchemy import select
+from sqlalchemy import select, and_
 from sqlalchemy.orm import Session
 
 
@@ -50,6 +50,8 @@ class UpdateTodoItem(BaseModel):
 
 
 class ResponseTodoItem(BaseModel):
+    """TODOリストのレスポンススキーマ."""
+
     id: int
     todo_list_id: int
     title: str = Field(title="Todo Item Title", min_length=1, max_length=100)
@@ -154,3 +156,18 @@ def delete_todo_list(todo_list_id: int, db: Session = Depends(get_db)):
     db.commit()
 
     return {}
+
+@app.get("/lists/{todo_list_id}/items/{todo_item_id}", response_model=ResponseTodoItem, tags=["Todo項目"])
+def get_todo_item(todo_list_id: int, todo_item_id: int, db: Session = Depends(get_db)):
+    """Todo項目を取得するAPI"""
+
+    stmt = select(ItemModel).where(
+        and_(ItemModel.id == todo_item_id, ItemModel.todo_list_id == todo_list_id)
+    )
+    result = db.execute(stmt)
+    db_item = result.scalar_one_or_none()
+
+    if db_item is None:
+        return {"error": "Todo list not found"}
+    
+    return db_item
