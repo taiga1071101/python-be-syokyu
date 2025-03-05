@@ -161,11 +161,12 @@ def delete_todo_list(todo_list_id: int, db: Session = Depends(get_db)):
 def get_todo_item(todo_list_id: int, todo_item_id: int, db: Session = Depends(get_db)):
     """Todo項目を取得するAPI"""
 
+    # SQL文の作成
     stmt = select(ItemModel).where(
         and_(ItemModel.id == todo_item_id, ItemModel.todo_list_id == todo_list_id)
     )
-    result = db.execute(stmt)
-    db_item = result.scalar_one_or_none()
+    result = db.execute(stmt)   # DBに問い合わせ
+    db_item = result.scalar_one_or_none()   # 単一の結果を取得
 
     if db_item is None:
         return {"error": "Todo list not found"}
@@ -189,3 +190,33 @@ def post_todo_item(todo_list_id: int, todo_item_list: NewTodoItem, db: Session =
     db.refresh(new_list)
 
     return new_list
+
+@app.put("/lists/{todo_list_id}/items/{todo_item_id}", response_model=ResponseTodoItem, tags=["Todo項目"])
+def put_todo_item(todo_list_id: int, todo_item_id: int, update_data: UpdateTodoItem, db: Session = Depends(get_db)):
+    """Todo項目を更新するAPI"""
+
+    stmt = select(ItemModel).where(
+        and_(ItemModel.id == todo_item_id, ItemModel.todo_list_id == todo_list_id)
+    )
+    result = db.execute(stmt)
+    db_item = result.scalar_one_or_none()
+
+    if db_item is None:
+        return {"error": "Todo list not found"}
+    
+    if update_data.title is not None:
+        db_item.title = update_data.title
+    if update_data.description is not None:
+        db_item.description = update_data.description
+    if update_data.due_at is not None:
+        db_item.due_at = update_data.due_at
+    if update_data.complete is not None:
+        if update_data.complete:
+            db_item.status_code = TodoItemStatusCode.COMPLETED.value
+        else:
+            db_item.status_code = TodoItemStatusCode.NOT_COMPLETED.value
+
+    db.commit()
+    db.refresh(db_item)
+
+    return db_item
