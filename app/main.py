@@ -171,3 +171,21 @@ def get_todo_item(todo_list_id: int, todo_item_id: int, db: Session = Depends(ge
         return {"error": "Todo list not found"}
     
     return db_item
+
+@app.post("/lists/{todo_list_id}/items", response_model=ResponseTodoItem, tags=["Todo項目"])
+def post_todo_item(todo_list_id: int, todo_item_list: NewTodoItem, db: Session = Depends(get_db)):
+    """Todo項目を作成するAPI"""
+
+    new_list = ItemModel(
+        todo_list_id = todo_list_id,
+        title = todo_item_list.title,
+        description = todo_item_list.description,
+        due_at = todo_item_list.due_at,
+        status_code = TodoItemStatusCode.NOT_COMPLETED.value
+    )
+
+    db.add(new_list)
+    db.commit()
+    db.refresh(new_list)
+
+    return new_list
