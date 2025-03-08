@@ -220,3 +220,21 @@ def put_todo_item(todo_list_id: int, todo_item_id: int, update_data: UpdateTodoI
     db.refresh(db_item)
 
     return db_item
+
+@app.delete("/lists/{todo_list_id}/items/{todo_item_id}", response_model=dict, tags=["Todo項目"])
+def delete_todo_item(todo_list_id: int, todo_item_id: int, db: Session = Depends(get_db)):
+    """Todo項目を削除するAPI"""
+
+    stmt = select(ItemModel).where(
+        and_(ItemModel.id == todo_item_id, ItemModel.todo_list_id == todo_list_id)
+    )
+    result = db.execute(stmt)
+    db_item = result.scalar_one_or_none()
+
+    if db_item is None:
+        return {"error": "Todo list not found"}
+    
+    db.delete(db_item)
+    db.commit()
+
+    return {}
