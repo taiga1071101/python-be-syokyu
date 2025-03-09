@@ -32,6 +32,8 @@ def put_todo_list(db: Session, todo_list_id: int, update_data: UpdateTodoList):
 
     # 指定されたtodo_list_idのリストを取得
     todo_list = db.get(ListModel, todo_list_id)
+    if todo_list is None:
+        return
 
     # update_dataに新しい値があれば更新
     if update_data.title is not None:
@@ -49,6 +51,8 @@ def delete_todo_list(db: Session, todo_list_id: int):
 
     # 指定されたtodo_list_idのリストを取得
     todo_list = db.get(ListModel, todo_list_id)
+    if todo_list is None:
+        return
 
     db.delete(todo_list)
     db.commit()
