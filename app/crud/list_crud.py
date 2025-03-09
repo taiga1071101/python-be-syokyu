@@ -54,3 +54,10 @@ def delete_todo_list(db: Session, todo_list_id: int):
     db.commit()
 
     return {}
+
+def get_todo_lists(db: Session):
+    """Todoリスト一覧を取得するAPI"""
+
+    stmt = select(ListModel)
+    result = db.execute(stmt)
+    return result.scalars().all()

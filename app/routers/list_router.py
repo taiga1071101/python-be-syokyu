@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from ..crud import list_crud
@@ -24,3 +25,7 @@ def put_todo_list(todo_list_id: int, update_data: UpdateTodoList, db: Session = 
 @router.delete("/{todo_list_id}", response_model=dict)
 def delete_todo_list(todo_list_id: int, db: Session = Depends(get_db)):
   return list_crud.delete_todo_list(db, todo_list_id)
+
+@router.get("/", response_model=List[ResponseTodoList])
+def get_todo_lists(db: Session = Depends(get_db)):
+  return list_crud.get_todo_lists(db)

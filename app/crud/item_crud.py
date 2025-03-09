@@ -76,3 +76,12 @@ def delete_todo_item(db: Session, todo_list_id: int, todo_item_id: int):
     db.commit()
 
     return {}
+
+def get_todo_items(db: Session, todo_list_id: int):
+    """Todo項目一覧を取得するAPI"""
+
+    stmt = select(ItemModel).where(
+        and_(ItemModel.todo_list_id == todo_list_id)
+    )
+    result = db.execute(stmt)
+    return result.scalars().all()
