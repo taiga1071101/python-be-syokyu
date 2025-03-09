@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select, and_
 from app.models.item_model import ItemModel
+from app.models.list_model import ListModel
 from app.const import TodoItemStatusCode
 from app.schemas.item_schema import NewTodoItem, UpdateTodoItem
 
@@ -16,6 +17,11 @@ def get_todo_item(db: Session, todo_list_id: int, todo_item_id: int):
 
 def post_todo_item(db: Session, todo_list_id: int, todo_item_list: NewTodoItem):
     """Todo項目を作成するAPI"""
+
+    stmt = select(ListModel).where(ListModel.id == todo_list_id)
+    result = db.execute(stmt).scalar_one_or_none()
+    if result is None:
+        return None
 
     new_list = ItemModel(
         todo_list_id = todo_list_id,
@@ -41,7 +47,7 @@ def put_todo_item(db: Session, todo_list_id: int, todo_item_id: int, update_data
     db_item = result.scalar_one_or_none()
 
     if db_item is None:
-        return {"error": "Todo list not found"}
+        return
     
     if update_data.title is not None:
         db_item.title = update_data.title
@@ -70,7 +76,7 @@ def delete_todo_item(db: Session, todo_list_id: int, todo_item_id: int):
     db_item = result.scalar_one_or_none()
 
     if db_item is None:
-        return {"error": "Todo list not found"}
+        return
     
     db.delete(db_item)
     db.commit()

@@ -17,7 +17,7 @@ class ResponseTodoItem(BaseModel):
 class NewTodoItem(BaseModel):
     """TODO項目新規作成時のスキーマ."""
 
-    title: str = Field(title="Todo Item Title", min_length=1, max_length=100)
+    title: str = Field(..., title="Todo Item Title", min_length=1, max_length=100)
     description: str | None = Field(default=None, title="Todo Item Description", min_length=1, max_length=200)
     due_at: datetime | None = Field(default=None, title="Todo Item Due")
 

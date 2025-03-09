@@ -2,6 +2,8 @@ import os
 from fastapi import FastAPI
 from .routers import list_router, item_router
 
+from fastapi.routing import APIRoute
+
 DEBUG = os.environ.get("DEBUG", "") == "true"
 
 app = FastAPI(
@@ -20,3 +22,6 @@ if DEBUG:
 
 app.include_router(list_router.router)
 app.include_router(item_router.router)
+
+for route in app.routes:
+    print(route.path, route.methods)
