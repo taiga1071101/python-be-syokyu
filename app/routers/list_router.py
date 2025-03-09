@@ -36,5 +36,5 @@ def delete_todo_list(todo_list_id: int, db: Session = Depends(get_db)):
   return result
 
 @router.get("/", response_model=List[ResponseTodoList])
-def get_todo_lists(db: Session = Depends(get_db)):
-  return list_crud.get_todo_lists(db)
+def get_todo_lists(page: int, per_page: int, db: Session = Depends(get_db)):
+  return list_crud.get_todo_lists(db, page, per_page)

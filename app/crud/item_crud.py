@@ -83,10 +83,13 @@ def delete_todo_item(db: Session, todo_list_id: int, todo_item_id: int):
 
     return {}
 
-def get_todo_items(db: Session, todo_list_id: int):
+def get_todo_items(db: Session, todo_list_id: int, page: int, per_page: int):
     """Todo項目一覧を取得するAPI"""
 
-    stmt = select(ItemModel).where(
+    page = max(page, 1)
+    offset = (page - 1) * per_page
+
+    stmt = select(ItemModel).offset(offset).limit(per_page).where(
         and_(ItemModel.todo_list_id == todo_list_id)
     )
     result = db.execute(stmt)

@@ -59,9 +59,12 @@ def delete_todo_list(db: Session, todo_list_id: int):
 
     return {}
 
-def get_todo_lists(db: Session):
+def get_todo_lists(db: Session, page: int, per_page: int):
     """Todoリスト一覧を取得するAPI"""
 
-    stmt = select(ListModel)
+    page = max(page, 1) # 1未満の場合は1に
+    offset = (page - 1) * per_page
+
+    stmt = select(ListModel).offset(offset).limit(per_page)
     result = db.execute(stmt)
     return result.scalars().all()
